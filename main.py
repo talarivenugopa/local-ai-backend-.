@@ -1,37 +1,28 @@
-﻿from fastapi import FastAPI
-import httpx
-import sqlite3
+import os
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from groq import Groq
 
 app = FastAPI()
 
-def init_db():
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, prompt TEXT, response TEXT)")
-    conn.commit()
-    conn.close()
+# Render ఎన్విరాన్‌మెంట్ నుండి API keyని తీసుకుంటుంది
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-init_db()
-
-@app.get("/")
-def read_root():
-    return {"message": "Local AI Backend is running with Ollama & SQLite!"}
+class PromptRequest(BaseModel):
+    prompt: str
 
 @app.post("/generate")
-async def generate_text(prompt: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "http://localhost:11434/api/generate",
-            json={"model": "llama3", "prompt": prompt, "stream": False},
-            timeout=60.0
+async def generate_text(request: PromptRequest):
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": request.prompt,
+                }
+            ],
+            model="llama3-8b-8192",
         )
-        res_data = response.json()
-        ai_response = res_data.get("response", "")
-
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO logs (prompt, response) VALUES (?, ?)", (prompt, ai_response))
-    conn.commit()
-    conn.close()
-
-    return {"prompt": prompt, "response": ai_response}
+        return {"response": chat_completion.choices[0].message.content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
