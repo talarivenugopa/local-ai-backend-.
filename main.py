@@ -1,4 +1,4 @@
-import os
+yuimport os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from groq import Groq
@@ -21,7 +21,7 @@ async def generate_text(request: PromptRequest):
                     "content": request.prompt,
                 }
             ],
-            model="llama3-8b-8192",
+          model="llama-3.1-8b-instant",  
         )
         return {"response": chat_completion.choices[0].message.content}
     except Exception as e:
