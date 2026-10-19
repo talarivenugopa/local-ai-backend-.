@@ -20,7 +20,7 @@ async def generate_text(request: PromptRequest):
                     "role": "user",
                     "content": request.prompt,
                 }
-            ],
+            
           model="llama-3.3-70b-versatile",
         )
         return {"response": chat_completion.choices[0].message.content}
