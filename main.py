@@ -12,7 +12,7 @@ class PromptRequest(BaseModel):
     prompt: str
 
 @app.post("/generate")
-async daf generate_text(request: PromptRequest):
+async def generate_text(request: PromptRequest):
     try:
         chat_completion = client.chat.completions.create(
             messages=[
