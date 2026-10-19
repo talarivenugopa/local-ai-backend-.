@@ -21,7 +21,8 @@ async def generate_text(request: PromptRequest):
                     "content": request.prompt,
                 }
             
-          model="llama-3.3-70b-versatile",
+          model="llama-3.1-8b-instant",
+
         )
         return {"response": chat_completion.choices[0].message.content}
     except Exception as e:
