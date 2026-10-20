@@ -13,6 +13,9 @@ class PromptRequest(BaseModel):
 @app.post("/generate")
 async def generate_text(request: PromptRequest):
     try:
+        models = client.models.list()
+        selected_model = models.data[0].id if models.data else "llama3-8b-8192"
+
         chat_completion = client.chat.completions.create(
             messages=[
                 {
@@ -20,8 +23,11 @@ async def generate_text(request: PromptRequest):
                     "content": request.prompt,
                 }
             ],
-            model="llama-3.3-70b-versatile",
+            model=selected_model,
         )
-        return {"response": chat_completion.choices[0].message.content}
+        return {
+            "model_used": selected_model,
+            "response": chat_completion.choices[0].message.content
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
