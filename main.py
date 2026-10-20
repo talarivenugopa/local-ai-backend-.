@@ -5,7 +5,6 @@ from groq import Groq
 
 app = FastAPI()
 
-# Render ఎన్విరాన్‌మెంట్ నుండి API keyని తీసుకుంటుంది
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 class PromptRequest(BaseModel):
@@ -21,7 +20,7 @@ async def generate_text(request: PromptRequest):
                     "content": request.prompt,
                 }
             ],
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
         )
         return {"response": chat_completion.choices[0].message.content}
     except Exception as e:
